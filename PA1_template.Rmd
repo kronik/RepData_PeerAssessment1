@@ -80,6 +80,8 @@ To find the mean and median total number of steps taken per day let's take a loo
 summary(groupByDate$steps)
 ```
 
+Summary shows us that **mean = 10770** and **median = 10760**
+
 ## What is the average daily activity pattern?
 
 To figure out daily activity pattern let's re-group data by intervals and draw a plot:
@@ -96,6 +98,14 @@ Let's zoom-in closer to a peak value:
 plot(groupByInterval$interval, groupByInterval$steps, type="l", xlab="5 minutes intervals", ylab="average steps", main="average(across all days) number of steps taken", xlim = c(800, 900))
 ```
 
+Let's zoom-in even closer to a peak value:
+
+```{r echo=TRUE}
+plot(groupByInterval$interval, groupByInterval$steps, type="l", xlab="5 minutes intervals", ylab="average steps", main="average(across all days) number of steps taken", xlim = c(830, 840), ylim=c(170, 230))
+```
+
+This last plot shows that **835th** time interval on average, contains the **maximum number of steps**
+
 ## Imputing missing values
 
 Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
@@ -109,13 +119,21 @@ dim(missingData)
 
 So there are totally **`r nrow(missingData)`** missing values.
 
-It feels like the best option to replace missing values will be to take a median amount of steps across all days for the same interval.
+Let's take a look on summary for steps groupped by dates to figure out **min, mean and median** values:
+
+```{r echo=TRUE}
+validData <- activitiesData[!is.na(activitiesData$steps),]
+
+summary(validData$steps)
+```
+
+It feels like the best option to replace missing values will be to take a mean amount of steps across all days for the same interval.
 
 Let's create a new dataset that is equal to the original dataset but with the missing data filled in using defined stategy:
 
 ```{r echo=TRUE}
 data <- activitiesData
-groupByInterval <- aggregate(steps ~ interval, data, median)
+groupByInterval <- aggregate(steps ~ interval, data, mean)
 
 for(i in 1:nrow(data)) {
     if (is.na(data[i,]$steps)) {
@@ -141,7 +159,9 @@ And calculate the mean and median total number of steps taken per day:
 summary(groupByDate$steps)
 ```
 
-We clearly see that mean and median numbers are changed after filling in all missing values.Both values are decreased and represent more realistic picture.
+Summary now shows us that **mean = 10770** and **median = 10770**
+
+We clearly see that mean and median numbers are changed after filling in all missing values. Both values are equal now and represent more realistic picture.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?

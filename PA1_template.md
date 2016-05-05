@@ -114,6 +114,8 @@ summary(groupByDate$steps)
 ##      41    8841   10760   10770   13290   21190
 ```
 
+Summary shows us that **mean = 10770** and **median = 10760**
+
 ## What is the average daily activity pattern?
 
 To figure out daily activity pattern let's re-group data by intervals and draw a plot:
@@ -136,6 +138,17 @@ plot(groupByInterval$interval, groupByInterval$steps, type="l", xlab="5 minutes 
 
 ![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
+Let's zoom-in even closer to a peak value:
+
+
+```r
+plot(groupByInterval$interval, groupByInterval$steps, type="l", xlab="5 minutes intervals", ylab="average steps", main="average(across all days) number of steps taken", xlim = c(830, 840), ylim=c(170, 230))
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
+This last plot shows that **835th** time interval on average, contains the **maximum number of steps**
+
 ## Imputing missing values
 
 Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
@@ -154,14 +167,28 @@ dim(missingData)
 
 So there are totally **2304** missing values.
 
-It feels like the best option to replace missing values will be to take a median amount of steps across all days for the same interval.
+Let's take a look on summary for steps groupped by dates to figure out **min, mean and median** values:
+
+
+```r
+validData <- activitiesData[!is.na(activitiesData$steps),]
+
+summary(validData$steps)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    0.00    0.00    0.00   37.38   12.00  806.00
+```
+
+It feels like the best option to replace missing values will be to take a mean amount of steps across all days for the same interval.
 
 Let's create a new dataset that is equal to the original dataset but with the missing data filled in using defined stategy:
 
 
 ```r
 data <- activitiesData
-groupByInterval <- aggregate(steps ~ interval, data, median)
+groupByInterval <- aggregate(steps ~ interval, data, mean)
 
 for(i in 1:nrow(data)) {
     if (is.na(data[i,]$steps)) {
@@ -186,7 +213,7 @@ groupByDate <- aggregate(steps ~ date, data, sum)
 hist(groupByDate$steps, col="green", main="Number of steps taken each day", xlab="Steps")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
 
 And calculate the mean and median total number of steps taken per day:
 
@@ -197,10 +224,12 @@ summary(groupByDate$steps)
 
 ```
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##      41    6778   10400    9504   12810   21190
+##      41    9819   10770   10770   12810   21190
 ```
 
-We clearly see that mean and median numbers are changed after filling in all missing values.Both values are decreased and represent more realistic picture.
+Summary now shows us that **mean = 10770** and **median = 10770**
+
+We clearly see that mean and median numbers are changed after filling in all missing values. Both values are equal now and represent more realistic picture.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -225,6 +254,6 @@ groupByDate <- aggregate(steps ~ dateType + interval, data, mean)
 xyplot(steps~interval | dateType, data=groupByDate, xlab="Intervals", ylab="Average steps", type=c("l"))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
 
 This graph clearly shows that people mostly perfer to exercise on weekday mornings and sometimes weekday evenings. And some activity happens on weekends morning, noon and right afternoon time.
